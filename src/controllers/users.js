@@ -1,6 +1,6 @@
-const { validationMiddleware } = require('../middlewares/validation-middleware')
 const User = require('../models/User')
 const { randomBytes } = require('crypto')
+const { sendMail } = require('./mail-sender')
 
 exports.register = async (req, res) => {
   let { username, email } = req.body
@@ -29,4 +29,10 @@ exports.register = async (req, res) => {
   })
 
   const result = await user.save()
+  res
+    .status(201)
+    .json({ success: true, message: 'User registered succefully.' })
+
+  //send mail to user
+  sendMail(email)
 }
