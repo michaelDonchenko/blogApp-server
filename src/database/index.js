@@ -1,8 +1,9 @@
 const mongoose = require('mongoose')
+const { MONGO_URI } = require('../constants')
 
 const connectDB = () => {
   mongoose
-    .connect(process.env.mongoURI, {
+    .connect(MONGO_URI, {
       useNewUrlParser: true,
       useUnifiedTopology: true,
       useFindAndModify: false,
