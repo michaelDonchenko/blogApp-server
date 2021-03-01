@@ -11,4 +11,5 @@ const email = check('email', 'Please provide a valid email').isEmail()
 module.exports = {
   registerValidators: [name, username, email, password],
   authenticateValidators: [username, password],
+  forgotPasswordValidator: [email],
 }

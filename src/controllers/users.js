@@ -37,7 +37,7 @@ exports.register = async (req, res) => {
       <h1>Hello ${user.username},</h1>
       <h2>Welcome to the best blog site!</h2>
       <p>Please click the following link in order to verify your account</p>
-      <a href="${DOMAIN}/api/verify-account/${user.verificationCode}">Verify now</a>
+      <a href="${DOMAIN}/api/verify-account/${user.verificationCode}">Verify Account</a>
       `
 
     //send mail to user
@@ -129,6 +129,46 @@ exports.login = async (req, res) => {
 exports.userProfile = async (req, res) => {
   try {
     return res.json({ user: req.user })
+  } catch (error) {
+    console.log(error.message)
+    return res.status(500).json({
+      success: false,
+      message: 'An error accurred',
+    })
+  }
+}
+
+exports.forgotPassword = async (req, res) => {
+  try {
+    let { email } = req.body
+    let user = await User.findOne({ email })
+
+    if (!user) {
+      return res.status(400).json({
+        success: false,
+        message: 'The user is not exist.',
+      })
+    }
+
+    //run resetpassword function
+    user.generatePasswordReset()
+    await user.save()
+
+    //send reset password email to the user
+    let html = `
+    <h1>Hello ${user.username},</h1>
+    <h2>Do you want to reset your password?</h2>
+    <p>Please click the following link in order to reset your password, if you did not request to reset your password just ingore this email.</p>
+    <a href="${DOMAIN}/api/password-reset/${user.resetPasswordToken}">Reset Password</a>
+    `
+
+    await sendMail(user.email, 'Reset password link', 'Reset password', html)
+
+    return res.status(200).json({
+      success: true,
+      message:
+        'Password reset link was succefully sent to your email, please check your mailbox for further instructions.',
+    })
   } catch (error) {
     console.log(error.message)
     return res.status(500).json({
