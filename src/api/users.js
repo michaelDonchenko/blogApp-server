@@ -1,5 +1,12 @@
 const { Router } = require('express')
-const { register, verifyCode, login } = require('../controllers/users')
+const {
+  register,
+  verifyCode,
+  login,
+  userProfile,
+} = require('../controllers/users')
+const { userAuth } = require('../middlewares/auth-guard')
+
 const { validationMiddleware } = require('../middlewares/validation-middleware')
 const router = Router()
 
@@ -16,5 +23,8 @@ router.get('/verify-account/:verificationCode', verifyCode)
 
 //authenticate the user (login)
 router.post('/login', authenticateValidators, validationMiddleware, login)
+
+//private user profile
+router.get('/user-profile', userAuth, userProfile)
 
 module.exports = router

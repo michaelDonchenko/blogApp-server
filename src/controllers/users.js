@@ -115,8 +115,20 @@ exports.login = async (req, res) => {
       success: true,
       message: 'User is now logged in.',
       user: user.getUserInfo(),
-      token: `Bearer ${token}`,
+      token: `bearer ${token}`,
     })
+  } catch (error) {
+    console.log(error.message)
+    return res.status(500).json({
+      success: false,
+      message: 'An error accurred',
+    })
+  }
+}
+
+exports.userProfile = async (req, res) => {
+  try {
+    return res.json({ user: req.user })
   } catch (error) {
     console.log(error.message)
     return res.status(500).json({
