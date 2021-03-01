@@ -73,7 +73,7 @@ UserSchema.methods.generatePasswordReset = function () {
 }
 
 UserSchema.methods.getUserInfo = function () {
-  return pick(this, ['_id email name username'])
+  return pick(this, ['_id', 'email', 'name', 'username', 'verified'])
 }
 
 const User = model('User', UserSchema)
