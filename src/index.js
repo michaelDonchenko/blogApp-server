@@ -16,11 +16,13 @@ app.use(passport.initialize())
 
 //Router exports
 const userRoutes = require('./api/users')
+const postRoutes = require('./api/post')
 
 //inject sub routes and apis
 app.use('/api', userRoutes)
+app.use('/api', postRoutes)
 
-const main = () => {
+const appStart = () => {
   try {
     //start DB
     connectDB()
@@ -33,4 +35,4 @@ const main = () => {
   }
 }
 
-main()
+appStart()

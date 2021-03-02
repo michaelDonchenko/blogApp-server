@@ -17,6 +17,8 @@ const {
   forgotPasswordValidator,
 } = require('../validators/user-validators')
 
+//////////////////////////////////////////////////////////////////////////////
+
 //register
 router.post('/register', registerValidators, validationMiddleware, register)
 
@@ -37,6 +39,7 @@ router.post(
   forgotPassword
 )
 
+//reset password
 router.get('/password-reset/:resetPasswordToken', (req, res) => {
   res.json({ message: 'here will be the reset password function' })
 })
