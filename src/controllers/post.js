@@ -30,10 +30,19 @@ exports.newPost = async (req, res) => {
 //get all posts
 exports.allPosts = async (req, res) => {
   try {
-    const posts = await Post.find().sort({ createdAt: -1 })
+    const limit = req.query.limit ? parseInt(req.query.limit) : 5
+    const page = req.query.page ? parseInt(req.query.page) : 1
+
+    const posts = await Post.find()
+      .populate('postedBy', 'username email')
+      .sort({ createdAt: -1 })
+      .skip((page - 1) * limit)
+      .limit(limit)
+
+    const count = await Post.find().estimatedDocumentCount()
 
     if (!posts) {
-      return res.status(300).json({
+      return res.status(404).json({
         success: false,
         message: 'Could not find any posts',
       })
@@ -42,6 +51,8 @@ exports.allPosts = async (req, res) => {
     return res.status(200).json({
       success: true,
       posts: posts,
+      count: count,
+      pages: Math.ceil(count / limit),
     })
   } catch (error) {
     console.log(error.message)
