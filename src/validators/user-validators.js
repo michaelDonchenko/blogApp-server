@@ -1,6 +1,5 @@
 const { check } = require('express-validator')
 
-const name = check('name', 'Name is required').not().isEmpty()
 const username = check('username', 'Username is required').not().isEmpty()
 const password = check(
   'password',
@@ -9,7 +8,7 @@ const password = check(
 const email = check('email', 'Please provide a valid email').isEmail()
 
 module.exports = {
-  registerValidators: [name, username, email, password],
+  registerValidators: [username, email, password],
   authenticateValidators: [username, password],
   forgotPasswordValidator: [email],
 }

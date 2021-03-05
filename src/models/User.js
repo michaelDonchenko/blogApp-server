@@ -7,10 +7,6 @@ const { pick } = require('lodash')
 
 const UserSchema = new Schema(
   {
-    name: {
-      type: String,
-      required: true,
-    },
     username: {
       type: String,
       required: true,
@@ -38,6 +34,16 @@ const UserSchema = new Schema(
     resetPasswordExpiresIn: {
       type: Date,
       required: false,
+    },
+    images: {
+      type: Array,
+      default: {
+        url: 'https://via.placeholder.com/300x300.png?text=User%20image',
+        public_id: Date.now(),
+      },
+    },
+    about: {
+      type: String,
     },
   },
   { timestamps: true }
@@ -73,7 +79,7 @@ UserSchema.methods.generatePasswordReset = function () {
 }
 
 UserSchema.methods.getUserInfo = function () {
-  return pick(this, ['_id', 'email', 'name', 'username', 'verified'])
+  return pick(this, ['_id', 'email', 'username', 'verified', 'images', 'about'])
 }
 
 const User = model('User', UserSchema)

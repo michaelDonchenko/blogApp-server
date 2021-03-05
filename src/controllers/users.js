@@ -108,6 +108,15 @@ exports.login = async (req, res) => {
       })
     }
 
+    //check if used is verified
+    if (user.verified === false) {
+      return res.status(400).json({
+        success: false,
+        message:
+          'Your user is not verified, in order to verify open your mailbox and click the verification link.',
+      })
+    }
+
     //generate token and send the user info back
     const token = await user.generateJWT()
 
@@ -129,6 +138,58 @@ exports.login = async (req, res) => {
 exports.userProfile = async (req, res) => {
   try {
     return res.json({ user: req.user })
+  } catch (error) {
+    console.log(error.message)
+    return res.status(500).json({
+      success: false,
+      message: 'An error accurred',
+    })
+  }
+}
+
+exports.publicProfile = async (req, res) => {
+  try {
+    const id = req.params.id
+    const user = await User.findById(id)
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User is not found',
+      })
+    }
+
+    return res.status(200).json({
+      success: true,
+      user: user.getUserInfo(),
+    })
+  } catch (error) {
+    console.log(error.message)
+    return res.status(500).json({
+      success: false,
+      message: 'An error accurred',
+    })
+  }
+}
+
+exports.allUsers = async (req, res) => {
+  try {
+    const users = await User.find()
+      .select('-password -verificationCode')
+      .sort({ createdAt: -1 })
+      .exec()
+
+    if (!users) {
+      res.status(404).json({
+        success: false,
+        message: 'No users found',
+      })
+    }
+
+    res.status(200).json({
+      users: users,
+      success: true,
+    })
   } catch (error) {
     console.log(error.message)
     return res.status(500).json({

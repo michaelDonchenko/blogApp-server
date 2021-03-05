@@ -4,7 +4,9 @@ const {
   verifyCode,
   login,
   userProfile,
+  publicProfile,
   forgotPassword,
+  allUsers,
 } = require('../controllers/users')
 const { userAuth } = require('../middlewares/auth-guard')
 
@@ -30,6 +32,12 @@ router.post('/login', authenticateValidators, validationMiddleware, login)
 
 //private user profile
 router.get('/user-profile', userAuth, userProfile)
+
+//public user profile
+router.get('/public-profile/:id', publicProfile)
+
+//all users
+router.get('/users', allUsers)
 
 //forgot password endpoint
 router.post(

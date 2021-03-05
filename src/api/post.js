@@ -6,6 +6,8 @@ const { postValidators } = require('../validators/post-validators')
 
 const router = Router()
 
+//////////////////////////////////////////////////////////////////////////////
+
 //add new post
 router.post('/post', userAuth, postValidators, validationMiddleware, newPost)
 
