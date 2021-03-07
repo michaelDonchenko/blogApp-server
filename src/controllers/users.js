@@ -137,7 +137,7 @@ exports.login = async (req, res) => {
 
 exports.userProfile = async (req, res) => {
   try {
-    return res.json({ user: req.user })
+    return await res.status(200).json({ user: req.user, success: true })
   } catch (error) {
     console.log(error.message)
     return res.status(500).json({
@@ -230,6 +230,47 @@ exports.forgotPassword = async (req, res) => {
       message:
         'Password reset link was succefully sent to your email, please check your mailbox for further instructions.',
     })
+  } catch (error) {
+    console.log(error.message)
+    return res.status(500).json({
+      success: false,
+      message: 'An error accurred',
+    })
+  }
+}
+
+exports.updateDetails = async (req, res) => {
+  try {
+    let { username, about } = req.body
+    let id = req.params.id
+
+    let user = await User.findById(id)
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found',
+      })
+    }
+
+    if (username !== user.username) {
+      let usernameExists = await User.findOne({ username })
+      if (usernameExists) {
+        return res.status(400).json({
+          message: 'This username already exists',
+          success: false,
+        })
+      }
+    }
+
+    let updatedUser = await User.findByIdAndUpdate(
+      id,
+      { username, about },
+      { new: true }
+    )
+    await updatedUser.save()
+
+    return res.status(200).json({ success: true, user: updatedUser })
   } catch (error) {
     console.log(error.message)
     return res.status(500).json({

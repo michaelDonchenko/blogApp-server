@@ -10,17 +10,19 @@ const app = express()
 require('./middlewares/passport-middleware')
 
 //init middleware
-app.use(cors())
 app.use(express.json({ limit: '5mb' }))
+app.use(cors())
 app.use(passport.initialize())
 
 //Router exports
 const userRoutes = require('./api/users')
 const postRoutes = require('./api/post')
+const cloudinaryRoutes = require('./api/cloudinary')
 
 //inject sub routes and apis
 app.use('/api', userRoutes)
 app.use('/api', postRoutes)
+app.use('/api', cloudinaryRoutes)
 
 const appStart = () => {
   try {

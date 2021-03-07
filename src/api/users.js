@@ -7,6 +7,7 @@ const {
   publicProfile,
   forgotPassword,
   allUsers,
+  updateDetails,
 } = require('../controllers/users')
 const { userAuth } = require('../middlewares/auth-guard')
 
@@ -17,6 +18,7 @@ const {
   registerValidators,
   authenticateValidators,
   forgotPasswordValidator,
+  changeDetailsValidator,
 } = require('../validators/user-validators')
 
 //////////////////////////////////////////////////////////////////////////////
@@ -51,5 +53,13 @@ router.post(
 router.get('/password-reset/:resetPasswordToken', (req, res) => {
   res.json({ message: 'here will be the reset password function' })
 })
+
+router.post(
+  '/update-details/:id',
+  userAuth,
+  changeDetailsValidator,
+  validationMiddleware,
+  updateDetails
+)
 
 module.exports = router

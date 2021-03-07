@@ -16,7 +16,7 @@ passport.use(
         throw new Error('User not found.')
       }
 
-      return done(null, user.getUserInfo())
+      return await done(null, user.getUserInfo())
     } catch (err) {
       console.log(err.message)
       done(null, false)
