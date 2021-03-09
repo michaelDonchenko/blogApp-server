@@ -70,7 +70,7 @@ UserSchema.methods.generateJWT = async function () {
     id: this._id,
     name: this.name,
   }
-  return await sign(payload, SECRET, { expiresIn: '1 day' })
+  return await sign(payload, SECRET)
 }
 
 UserSchema.methods.generatePasswordReset = function () {

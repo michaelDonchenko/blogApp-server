@@ -62,3 +62,70 @@ exports.allPosts = async (req, res) => {
     })
   }
 }
+
+exports.deletePost = async (req, res) => {
+  const id = req.params.id
+  const user = req.user
+  const post = await Post.findById(id)
+  try {
+    if (!post) {
+      return res.status(404).json({
+        success: false,
+        message: 'Post not found',
+      })
+    }
+
+    if (String(post.postedBy) !== String(user._id)) {
+      return res.status(400).json({
+        success: false,
+        message: 'You do not have permission to delete this post',
+      })
+    }
+
+    await post.delete()
+    return res.status(200).json({
+      success: true,
+      message: 'Post deleted succefully',
+    })
+  } catch (error) {
+    console.log(error.message)
+    return res.status(500).json({
+      success: false,
+      message: 'An error occurred',
+    })
+  }
+}
+
+exports.updatePost = async (req, res) => {
+  const id = req.params.id
+  const user = req.user
+  let post = await Post.findById(id)
+  const { title, body } = req.body
+  try {
+    if (!post) {
+      return res.status(404).json({
+        success: false,
+        message: 'Post not found',
+      })
+    }
+
+    if (String(post.postedBy) !== String(user._id)) {
+      return res.status(400).json({
+        success: false,
+        message: 'You do not have permission to update this post',
+      })
+    }
+
+    await post.updateOne({ title, body })
+    return res.status(200).json({
+      success: true,
+      message: 'Post updated succefully',
+    })
+  } catch (error) {
+    console.log(error.message)
+    return res.status(500).json({
+      success: false,
+      message: 'An error occurred',
+    })
+  }
+}
