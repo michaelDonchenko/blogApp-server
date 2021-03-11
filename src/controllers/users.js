@@ -149,8 +149,8 @@ exports.userProfile = async (req, res) => {
 
 exports.publicProfile = async (req, res) => {
   try {
-    const id = req.params.id
-    const user = await User.findById(id)
+    const username = req.params.username
+    const user = await User.findOne({ username })
 
     if (!user) {
       return res.status(404).json({

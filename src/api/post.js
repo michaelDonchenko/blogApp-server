@@ -4,6 +4,9 @@ const {
   allPosts,
   deletePost,
   updatePost,
+  getPost,
+  postsByUser,
+  searchQuery,
 } = require('../controllers/post')
 const { userAuth } = require('../middlewares/auth-guard')
 const { validationMiddleware } = require('../middlewares/validation-middleware')
@@ -22,8 +25,13 @@ router.post('/post', userAuth, postValidators, validationMiddleware, newPost)
 //get all posts
 router.get('/posts', allPosts)
 
+//get single post
+router.get('/post/:id', getPost)
+
 //delete post
 router.delete('/post/:id', userAuth, deletePost)
+
+router.post('/searchQuery', searchQuery)
 
 //update post
 router.put(
@@ -33,5 +41,8 @@ router.put(
   validationMiddleware,
   updatePost
 )
+
+//get posts by user
+router.get('/user-posts/:userId', postsByUser)
 
 module.exports = router

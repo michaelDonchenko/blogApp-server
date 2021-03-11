@@ -34,7 +34,7 @@ exports.allPosts = async (req, res) => {
     const page = req.query.page ? parseInt(req.query.page) : 1
 
     const posts = await Post.find()
-      .populate('postedBy', 'username email')
+      .populate('postedBy', 'username email images')
       .sort({ createdAt: -1 })
       .skip((page - 1) * limit)
       .limit(limit)
@@ -86,6 +86,7 @@ exports.deletePost = async (req, res) => {
     return res.status(200).json({
       success: true,
       message: 'Post deleted succefully',
+      deleted: post,
     })
   } catch (error) {
     console.log(error.message)
@@ -120,6 +121,109 @@ exports.updatePost = async (req, res) => {
     return res.status(200).json({
       success: true,
       message: 'Post updated succefully',
+    })
+  } catch (error) {
+    console.log(error.message)
+    return res.status(500).json({
+      success: false,
+      message: 'An error occurred',
+    })
+  }
+}
+
+exports.getPost = async (req, res) => {
+  let id = req.params.id
+  try {
+    const post = await Post.findById(id).populate(
+      'postedBy',
+      'username email images'
+    )
+
+    if (!post) {
+      return res.status(404).json({
+        success: false,
+        message: 'Post not found',
+      })
+    }
+
+    return res.status(200).json({
+      success: true,
+      post: post,
+    })
+  } catch (error) {
+    console.log(error.message)
+    return res.status(500).json({
+      success: false,
+      message: 'An error occurred',
+    })
+  }
+}
+
+exports.postsByUser = async (req, res) => {
+  const userId = req.params.userId
+  const limit = req.query.limit ? parseInt(req.query.limit) : 5
+  const page = req.query.page ? parseInt(req.query.page) : 1
+
+  try {
+    const posts = await Post.find({ postedBy: userId })
+      .select('title createdAt')
+      .sort({ createdAt: -1 })
+      .skip((page - 1) * limit)
+      .limit(limit)
+
+    const count = await Post.find({ postedBy: userId }).countDocuments().exec()
+
+    if (!posts) {
+      return res.status(404).json({
+        success: false,
+        message: 'Could not find any posts',
+      })
+    }
+
+    return res.status(200).json({
+      success: true,
+      posts: posts,
+      count: count,
+      pages: Math.ceil(count / limit),
+    })
+  } catch (error) {
+    console.log(error.message)
+    return res.status(500).json({
+      success: false,
+      message: 'An error occurred',
+    })
+  }
+}
+
+exports.searchQuery = async (req, res) => {
+  let { keyword } = req.body
+  const limit = req.query.limit ? parseInt(req.query.limit) : 5
+  const page = req.query.page ? parseInt(req.query.page) : 1
+
+  try {
+    const posts = await Post.find({ $text: { $search: keyword } })
+      .populate('postedBy', 'username email images')
+      .sort({ createdAt: -1 })
+      .skip((page - 1) * limit)
+      .limit(limit)
+      .exec()
+
+    if (!posts) {
+      return res.status(404).json({
+        success: false,
+        message: 'Could not find any posts',
+      })
+    }
+
+    const count = await Post.find({
+      $text: { $search: keyword },
+    }).countDocuments()
+
+    return res.status(200).json({
+      success: true,
+      posts: posts,
+      count: count,
+      pages: Math.ceil(count / limit),
     })
   } catch (error) {
     console.log(error.message)

@@ -36,7 +36,7 @@ router.post('/login', authenticateValidators, validationMiddleware, login)
 router.get('/user-profile', userAuth, userProfile)
 
 //public user profile
-router.get('/public-profile/:id', publicProfile)
+router.get('/public-profile/:username', publicProfile)
 
 //all users
 router.get('/users', allUsers)

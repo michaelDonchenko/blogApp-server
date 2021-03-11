@@ -18,6 +18,7 @@ const PostSchema = new Schema(
   },
   { timestamps: true }
 )
+PostSchema.index({ title: 'text', body: 'text' })
 
 const Post = model('Post', PostSchema)
 module.exports = Post
