@@ -8,6 +8,9 @@ const {
   forgotPassword,
   allUsers,
   updateDetails,
+  forgotUsername,
+  passwordResetValidation,
+  passwordResetAction,
 } = require('../controllers/users')
 const { userAuth } = require('../middlewares/auth-guard')
 
@@ -32,6 +35,9 @@ router.get('/verify-account/:verificationCode', verifyCode)
 //authenticate the user (login)
 router.post('/login', authenticateValidators, validationMiddleware, login)
 
+//forgot username
+router.post('/forgot-username', forgotUsername)
+
 //private user profile
 router.get('/user-profile', userAuth, userProfile)
 
@@ -49,10 +55,11 @@ router.post(
   forgotPassword
 )
 
-//reset password
-router.get('/password-reset/:resetPasswordToken', (req, res) => {
-  res.json({ message: 'here will be the reset password function' })
-})
+//reset password validation
+router.get('/password-reset/:resetPasswordToken', passwordResetValidation)
+
+//reset password action
+router.post('/password-reset', passwordResetAction)
 
 router.post(
   '/update-details/:id',

@@ -1,7 +1,7 @@
 const User = require('../models/User')
 const { randomBytes } = require('crypto')
 const { sendMail } = require('./mail-sender')
-const { DOMAIN } = require('../constants')
+const { CLIENT_URL } = require('../constants')
 const { join } = require('path')
 
 exports.register = async (req, res) => {
@@ -173,11 +173,18 @@ exports.publicProfile = async (req, res) => {
 }
 
 exports.allUsers = async (req, res) => {
+  const limit = req.query.limit ? parseInt(req.query.limit) : 10
+  const page = req.query.page ? parseInt(req.query.page) : 1
+
   try {
     const users = await User.find()
-      .select('-password -verificationCode')
+      .select('username email verified images')
       .sort({ createdAt: -1 })
+      .skip((page - 1) * limit)
+      .limit(limit)
       .exec()
+
+    const count = await User.find().estimatedDocumentCount()
 
     if (!users) {
       res.status(404).json({
@@ -186,9 +193,11 @@ exports.allUsers = async (req, res) => {
       })
     }
 
-    res.status(200).json({
-      users: users,
+    return res.status(200).json({
       success: true,
+      users: users,
+      count: count,
+      pages: Math.ceil(count / limit),
     })
   } catch (error) {
     console.log(error.message)
@@ -220,7 +229,7 @@ exports.forgotPassword = async (req, res) => {
     <h1>Hello ${user.username},</h1>
     <h2>Do you want to reset your password?</h2>
     <p>Please click the following link in order to reset your password, if you did not request to reset your password just ingore this email.</p>
-    <a href="${DOMAIN}/api/password-reset/${user.resetPasswordToken}">Reset Password</a>
+    <a href="${CLIENT_URL}/password-reset/${user.resetPasswordToken}">Reset Password</a>
     `
 
     await sendMail(user.email, 'Reset password link', 'Reset password', html)
@@ -271,6 +280,121 @@ exports.updateDetails = async (req, res) => {
     await updatedUser.save()
 
     return res.status(200).json({ success: true, user: updatedUser })
+  } catch (error) {
+    console.log(error.message)
+    return res.status(500).json({
+      success: false,
+      message: 'An error accurred',
+    })
+  }
+}
+
+exports.forgotUsername = async (req, res) => {
+  let { email } = req.body
+  try {
+    const user = await User.findOne({ email })
+
+    if (!email) {
+      return res.status(400).json({
+        success: false,
+        message: 'Please provide email address',
+      })
+    }
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User with that email does not exist',
+      })
+    }
+
+    let username = user.username
+
+    return res.status(200).json({
+      success: true,
+      username,
+    })
+  } catch (error) {
+    console.log(error.message)
+    return res.status(500).json({
+      success: false,
+      message: 'An error accurred',
+    })
+  }
+}
+
+exports.passwordResetValidation = async (req, res) => {
+  const { resetPasswordToken } = req.params
+  try {
+    let user = await User.findOne({ resetPasswordToken })
+    const date = new Date()
+
+    if (!user) {
+      return res.status(401).json({
+        success: false,
+        message: 'Unauthoraized access, invalid verification code.',
+      })
+    }
+
+    if (date > user.resetPasswordExpiresIn) {
+      return res.status(401).json({
+        success: false,
+        message:
+          'Your reset passwrod link has been expired, please get a new link in order to reset your password.',
+      })
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: 'The token is verified you may change your password now.',
+    })
+  } catch (error) {
+    console.log(error.message)
+    return res.status(500).json({
+      success: false,
+      message: 'An error accurred',
+    })
+  }
+}
+
+exports.passwordResetAction = async (req, res) => {
+  const { password, confirmPassword } = req.body
+  const { resetPasswordToken } = req.params
+
+  try {
+    let user = await User.findOne({ resetPasswordToken })
+
+    if (!user) {
+      return res.status(401).json({
+        success: false,
+        message: 'Unauthoraized access, invalid verification code.',
+      })
+    }
+
+    if (password.length <= 6) {
+      return res.status(400).json({
+        success: false,
+        message: 'Password has to be at least 6 characters',
+      })
+    }
+
+    if (password !== confirmPassword) {
+      return res.status(400).json({
+        success: false,
+        message: 'Passwords do not match',
+      })
+    }
+
+    user.password = password
+    user.resetPasswordToken = undefined
+
+    await user.save()
+
+    return res.status(200).json({
+      success: true,
+      message:
+        'Your password is saved you can now log-in with your new password.',
+    })
   } catch (error) {
     console.log(error.message)
     return res.status(500).json({

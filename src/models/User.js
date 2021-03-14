@@ -45,6 +45,14 @@ const UserSchema = new Schema(
     about: {
       type: String,
     },
+    banned: {
+      type: Boolean,
+      default: false,
+    },
+    banReason: {
+      type: String,
+      default: '',
+    },
   },
   { timestamps: true }
 )
