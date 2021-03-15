@@ -358,8 +358,7 @@ exports.passwordResetValidation = async (req, res) => {
 }
 
 exports.passwordResetAction = async (req, res) => {
-  const { password, confirmPassword } = req.body
-  const { resetPasswordToken } = req.params
+  const { password, confirmPassword, resetPasswordToken } = req.body
 
   try {
     let user = await User.findOne({ resetPasswordToken })
@@ -371,7 +370,7 @@ exports.passwordResetAction = async (req, res) => {
       })
     }
 
-    if (password.length <= 6) {
+    if (password.length < 6) {
       return res.status(400).json({
         success: false,
         message: 'Password has to be at least 6 characters',
