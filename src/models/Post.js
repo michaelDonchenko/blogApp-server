@@ -15,6 +15,8 @@ const PostSchema = new Schema(
       type: ObjectId,
       ref: 'User',
     },
+    views: { type: Number, default: 0 },
+    likes: [{ type: ObjectId, ref: 'User' }],
   },
   { timestamps: true }
 )

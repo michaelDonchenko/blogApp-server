@@ -7,6 +7,8 @@ const {
   getPost,
   postsByUser,
   searchQuery,
+  like,
+  unlike,
 } = require('../controllers/post')
 const { userAuth } = require('../middlewares/auth-guard')
 const { validationMiddleware } = require('../middlewares/validation-middleware')
@@ -44,5 +46,9 @@ router.put(
 
 //get posts by user
 router.get('/user-posts/:userId', postsByUser)
+
+router.put('/like/:postId', userAuth, like)
+
+router.put('/unlike/:postId', userAuth, unlike)
 
 module.exports = router

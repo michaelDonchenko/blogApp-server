@@ -1,4 +1,5 @@
 const Post = require('../models/Post')
+const User = require('../models/User')
 
 //create new post
 exports.newPost = async (req, res) => {
@@ -134,10 +135,11 @@ exports.updatePost = async (req, res) => {
 exports.getPost = async (req, res) => {
   let id = req.params.id
   try {
-    const post = await Post.findById(id).populate(
-      'postedBy',
-      'username email images'
-    )
+    const post = await Post.findByIdAndUpdate(
+      id,
+      { $inc: { views: 1 } },
+      { new: true }
+    ).populate('postedBy', 'username email images')
 
     if (!post) {
       return res.status(404).json({
@@ -224,6 +226,86 @@ exports.searchQuery = async (req, res) => {
       posts: posts,
       count: count,
       pages: Math.ceil(count / limit),
+    })
+  } catch (error) {
+    console.log(error.message)
+    return res.status(500).json({
+      success: false,
+      message: 'An error occurred',
+    })
+  }
+}
+
+exports.like = async (req, res) => {
+  const { postId } = req.params
+  const { _id } = req.user
+
+  try {
+    const user = await User.findById(_id)
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'Could not find the user',
+      })
+    }
+
+    let post = await Post.findByIdAndUpdate(
+      postId,
+      { $push: { likes: _id } },
+      { new: true }
+    )
+
+    if (!post) {
+      return res.status(404).json({
+        success: false,
+        message: 'Could not find the post',
+      })
+    }
+
+    return res.status(201).json({
+      success: true,
+      post: post,
+    })
+  } catch (error) {
+    console.log(error.message)
+    return res.status(500).json({
+      success: false,
+      message: 'An error occurred',
+    })
+  }
+}
+
+exports.unlike = async (req, res) => {
+  const { postId } = req.params
+  const { _id } = req.user
+
+  try {
+    const user = await User.findById(_id)
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'Could not find the user',
+      })
+    }
+
+    let post = await Post.findByIdAndUpdate(
+      postId,
+      { $pull: { likes: _id } },
+      { new: true }
+    )
+
+    if (!post) {
+      return res.status(404).json({
+        success: false,
+        message: 'Could not find the post',
+      })
+    }
+
+    return res.status(201).json({
+      success: true,
+      post: post,
     })
   } catch (error) {
     console.log(error.message)
