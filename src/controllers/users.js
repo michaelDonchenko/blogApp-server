@@ -1,7 +1,7 @@
 const User = require('../models/User')
 const { randomBytes } = require('crypto')
 const { sendMail } = require('./mail-sender')
-const { CLIENT_URL } = require('../constants')
+const { CLIENT_URL, DOMAIN } = require('../constants')
 const { join } = require('path')
 
 exports.register = async (req, res) => {
