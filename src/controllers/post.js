@@ -265,7 +265,6 @@ exports.like = async (req, res) => {
 
     return res.status(201).json({
       success: true,
-      post: post,
     })
   } catch (error) {
     console.log(error.message)
@@ -305,7 +304,6 @@ exports.unlike = async (req, res) => {
 
     return res.status(201).json({
       success: true,
-      post: post,
     })
   } catch (error) {
     console.log(error.message)
