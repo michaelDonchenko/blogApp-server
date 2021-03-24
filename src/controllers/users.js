@@ -121,7 +121,8 @@ exports.login = async (req, res) => {
     if (user.banned === true) {
       return res.status(400).json({
         success: false,
-        message: 'Your user was banned, access denied.',
+        message:
+          'Your user was banned, access denied. For any information you can contact michael1994d@gmail.com',
       })
     }
 
@@ -186,7 +187,7 @@ exports.allUsers = async (req, res) => {
 
   try {
     const users = await User.find()
-      .select('username email verified images role')
+      .select('username email verified images role banned')
       .sort({ createdAt: -1 })
       .skip((page - 1) * limit)
       .limit(limit)
@@ -413,12 +414,11 @@ exports.passwordResetAction = async (req, res) => {
 
 exports.banUser = async (req, res) => {
   const userId = req.params.userId
-  let { banned, banReason } = req.body
+  let { banned } = req.body
   try {
-    console.log(req.body)
     let user = await User.findByIdAndUpdate(
       userId,
-      { banned, banReason },
+      { banned },
       { new: true }
     ).select('-password -verificationCode')
 

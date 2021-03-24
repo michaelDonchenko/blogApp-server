@@ -11,30 +11,37 @@ const UserSchema = new Schema(
       type: String,
       required: true,
     },
+
     email: {
       type: String,
       required: true,
     },
+
     password: {
       type: String,
       required: true,
     },
+
     verified: {
       type: Boolean,
       default: false,
     },
+
     verificationCode: {
       type: String,
       required: false,
     },
+
     resetPasswordToken: {
       type: String,
       required: false,
     },
+
     resetPasswordExpiresIn: {
       type: Date,
       required: false,
     },
+
     images: {
       type: Array,
       default: {
@@ -42,17 +49,16 @@ const UserSchema = new Schema(
         public_id: Date.now(),
       },
     },
+
     about: {
       type: String,
     },
+
     banned: {
       type: Boolean,
       default: false,
     },
-    banReason: {
-      type: String,
-      default: '',
-    },
+
     role: {
       type: String,
       default: 'subscriber',
@@ -99,6 +105,7 @@ UserSchema.methods.getUserInfo = function () {
     'images',
     'about',
     'role',
+    'banned',
   ])
 }
 

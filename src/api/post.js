@@ -12,6 +12,8 @@ const {
   confirmedPosts,
   unconfirmedPosts,
   changeStatus,
+  deniedPosts,
+  allPostsByUser,
 } = require('../controllers/post')
 const { adminAuth } = require('../middlewares/admin-middleware')
 const { userAuth } = require('../middlewares/auth-guard')
@@ -37,6 +39,9 @@ router.get('/confirmed-posts', confirmedPosts)
 //get unconfirmed posts
 router.get('/unconfirmed-posts', userAuth, adminAuth, unconfirmedPosts)
 
+//get denied posts
+router.get('/denied-posts', userAuth, adminAuth, deniedPosts)
+
 //get single post
 router.get('/post/:id', getPost)
 
@@ -56,6 +61,9 @@ router.put(
 
 //get posts by user
 router.get('/user-posts/:userId', postsByUser)
+
+//get posts by user
+router.get('/all-user-posts/:userId', allPostsByUser)
 
 //like
 router.put('/like/:postId', userAuth, like)

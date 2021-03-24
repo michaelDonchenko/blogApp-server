@@ -169,6 +169,44 @@ exports.postsByUser = async (req, res) => {
   const page = req.query.page ? parseInt(req.query.page) : 1
 
   try {
+    const posts = await Post.find({ postedBy: userId, status: 'Confirmed' })
+      .select('title createdAt status')
+      .sort({ createdAt: -1 })
+      .skip((page - 1) * limit)
+      .limit(limit)
+
+    const count = await Post.find({ postedBy: userId, status: 'Confirmed' })
+      .countDocuments()
+      .exec()
+
+    if (!posts) {
+      return res.status(404).json({
+        success: false,
+        message: 'Could not find any posts',
+      })
+    }
+
+    return res.status(200).json({
+      success: true,
+      posts: posts,
+      count: count,
+      pages: Math.ceil(count / limit),
+    })
+  } catch (error) {
+    console.log(error.message)
+    return res.status(500).json({
+      success: false,
+      message: 'An error occurred',
+    })
+  }
+}
+
+exports.allPostsByUser = async (req, res) => {
+  const userId = req.params.userId
+  const limit = req.query.limit ? parseInt(req.query.limit) : 5
+  const page = req.query.page ? parseInt(req.query.page) : 1
+
+  try {
     const posts = await Post.find({ postedBy: userId })
       .select('title createdAt status')
       .sort({ createdAt: -1 })
@@ -322,14 +360,14 @@ exports.confirmedPosts = async (req, res) => {
     const limit = req.query.limit ? parseInt(req.query.limit) : 5
     const page = req.query.page ? parseInt(req.query.page) : 1
 
-    const posts = await Post.find({ status: 'confirmed' })
+    const posts = await Post.find({ status: 'Confirmed' })
       .populate('postedBy', 'username email images')
       .sort({ createdAt: -1 })
       .skip((page - 1) * limit)
       .limit(limit)
       .exec()
 
-    const count = await Post.find({ status: 'confirmed' })
+    const count = await Post.find({ status: 'Confirmed' })
       .countDocuments()
       .exec()
 
@@ -361,16 +399,53 @@ exports.unconfirmedPosts = async (req, res) => {
     const limit = req.query.limit ? parseInt(req.query.limit) : 5
     const page = req.query.page ? parseInt(req.query.page) : 1
 
-    const posts = await Post.find({ status: 'not confirmed' })
+    const posts = await Post.find({ status: 'Not confirmed' })
       .populate('postedBy', 'username email images')
       .sort({ createdAt: -1 })
       .skip((page - 1) * limit)
       .limit(limit)
       .exec()
 
-    const count = await Post.find({ status: 'not confirmed' })
+    const count = await Post.find({ status: 'Not confirmed' })
       .countDocuments()
       .exec()
+
+    if (!posts) {
+      return res.status(404).json({
+        success: false,
+        message: 'Could not find any posts',
+      })
+    }
+
+    return res.status(200).json({
+      success: true,
+      posts: posts,
+      count: count,
+      pages: Math.ceil(count / limit),
+    })
+  } catch (error) {
+    console.log(error.message)
+    return res.status(500).json({
+      success: false,
+      message: 'An error occurred',
+    })
+  }
+}
+
+//get denied posts
+exports.deniedPosts = async (req, res) => {
+  try {
+    const limit = req.query.limit ? parseInt(req.query.limit) : 5
+    const page = req.query.page ? parseInt(req.query.page) : 1
+
+    const posts = await Post.find({ status: 'Denied' })
+      .populate('postedBy', 'username email images')
+      .sort({ createdAt: -1 })
+      .skip((page - 1) * limit)
+      .limit(limit)
+      .exec()
+
+    const count = await Post.find({ status: 'Denied' }).countDocuments().exec()
 
     if (!posts) {
       return res.status(404).json({
