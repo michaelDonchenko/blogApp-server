@@ -53,6 +53,10 @@ const UserSchema = new Schema(
       type: String,
       default: '',
     },
+    role: {
+      type: String,
+      default: 'subscriber',
+    },
   },
   { timestamps: true }
 )
@@ -87,7 +91,15 @@ UserSchema.methods.generatePasswordReset = function () {
 }
 
 UserSchema.methods.getUserInfo = function () {
-  return pick(this, ['_id', 'email', 'username', 'verified', 'images', 'about'])
+  return pick(this, [
+    '_id',
+    'email',
+    'username',
+    'verified',
+    'images',
+    'about',
+    'role',
+  ])
 }
 
 const User = model('User', UserSchema)

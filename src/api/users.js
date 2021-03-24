@@ -11,9 +11,10 @@ const {
   forgotUsername,
   passwordResetValidation,
   passwordResetAction,
+  banUser,
 } = require('../controllers/users')
 const { userAuth } = require('../middlewares/auth-guard')
-
+const { adminAuth } = require('../middlewares/admin-middleware')
 const { validationMiddleware } = require('../middlewares/validation-middleware')
 const router = Router()
 
@@ -61,6 +62,7 @@ router.get('/password-reset/:resetPasswordToken', passwordResetValidation)
 //reset password action
 router.post('/password-reset', passwordResetAction)
 
+//details update
 router.post(
   '/update-details/:id',
   userAuth,
@@ -68,5 +70,8 @@ router.post(
   validationMiddleware,
   updateDetails
 )
+
+//ban user
+router.put('/ban/:userId', userAuth, adminAuth, banUser)
 
 module.exports = router

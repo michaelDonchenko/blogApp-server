@@ -9,7 +9,11 @@ const {
   searchQuery,
   like,
   unlike,
+  confirmedPosts,
+  unconfirmedPosts,
+  changeStatus,
 } = require('../controllers/post')
+const { adminAuth } = require('../middlewares/admin-middleware')
 const { userAuth } = require('../middlewares/auth-guard')
 const { validationMiddleware } = require('../middlewares/validation-middleware')
 const {
@@ -26,6 +30,12 @@ router.post('/post', userAuth, postValidators, validationMiddleware, newPost)
 
 //get all posts
 router.get('/posts', allPosts)
+
+//get confirmed posts
+router.get('/confirmed-posts', confirmedPosts)
+
+//get unconfirmed posts
+router.get('/unconfirmed-posts', userAuth, adminAuth, unconfirmedPosts)
 
 //get single post
 router.get('/post/:id', getPost)
@@ -47,8 +57,13 @@ router.put(
 //get posts by user
 router.get('/user-posts/:userId', postsByUser)
 
+//like
 router.put('/like/:postId', userAuth, like)
 
+//unlike
 router.put('/unlike/:postId', userAuth, unlike)
+
+//change post status
+router.put('/changeStatus/:postId', userAuth, adminAuth, changeStatus)
 
 module.exports = router

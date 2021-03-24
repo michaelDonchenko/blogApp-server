@@ -117,6 +117,14 @@ exports.login = async (req, res) => {
       })
     }
 
+    //check if used is not banned
+    if (user.banned === true) {
+      return res.status(400).json({
+        success: false,
+        message: 'Your user was banned, access denied.',
+      })
+    }
+
     //generate token and send the user info back
     const token = await user.generateJWT()
 
@@ -178,7 +186,7 @@ exports.allUsers = async (req, res) => {
 
   try {
     const users = await User.find()
-      .select('username email verified images')
+      .select('username email verified images role')
       .sort({ createdAt: -1 })
       .skip((page - 1) * limit)
       .limit(limit)
@@ -393,6 +401,38 @@ exports.passwordResetAction = async (req, res) => {
       success: true,
       message:
         'Your password is saved you can now log-in with your new password.',
+    })
+  } catch (error) {
+    console.log(error.message)
+    return res.status(500).json({
+      success: false,
+      message: 'An error accurred',
+    })
+  }
+}
+
+exports.banUser = async (req, res) => {
+  const userId = req.params.userId
+  let { banned, banReason } = req.body
+  try {
+    console.log(req.body)
+    let user = await User.findByIdAndUpdate(
+      userId,
+      { banned, banReason },
+      { new: true }
+    ).select('-password -verificationCode')
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found',
+      })
+    }
+
+    return res.status(201).json({
+      success: true,
+      message: 'Banned status updated succefully',
+      user,
     })
   } catch (error) {
     console.log(error.message)

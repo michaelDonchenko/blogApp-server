@@ -17,6 +17,16 @@ const PostSchema = new Schema(
     },
     views: { type: Number, default: 0 },
     likes: [{ type: ObjectId, ref: 'User' }],
+    status: {
+      type: String,
+      default: 'not confirmed',
+      enum: ['not confirmed', 'confirmed', 'denied'],
+      required: true,
+    },
+    declineReason: {
+      type: String,
+      default: '',
+    },
   },
   { timestamps: true }
 )

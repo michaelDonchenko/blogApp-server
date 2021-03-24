@@ -16,7 +16,8 @@ exports.newPost = async (req, res) => {
 
     return res.status(201).json({
       success: true,
-      message: 'Post created succefully',
+      message:
+        'Post created succefully and will be waiting for admin confirmation.',
       post: post,
     })
   } catch (error) {
@@ -39,8 +40,9 @@ exports.allPosts = async (req, res) => {
       .sort({ createdAt: -1 })
       .skip((page - 1) * limit)
       .limit(limit)
+      .exec()
 
-    const count = await Post.find().estimatedDocumentCount()
+    const count = await Post.find().countDocuments().exec()
 
     if (!posts) {
       return res.status(404).json({
@@ -168,7 +170,7 @@ exports.postsByUser = async (req, res) => {
 
   try {
     const posts = await Post.find({ postedBy: userId })
-      .select('title createdAt')
+      .select('title createdAt status')
       .sort({ createdAt: -1 })
       .skip((page - 1) * limit)
       .limit(limit)
@@ -304,6 +306,110 @@ exports.unlike = async (req, res) => {
 
     return res.status(201).json({
       success: true,
+    })
+  } catch (error) {
+    console.log(error.message)
+    return res.status(500).json({
+      success: false,
+      message: 'An error occurred',
+    })
+  }
+}
+
+//get confirmed posts
+exports.confirmedPosts = async (req, res) => {
+  try {
+    const limit = req.query.limit ? parseInt(req.query.limit) : 5
+    const page = req.query.page ? parseInt(req.query.page) : 1
+
+    const posts = await Post.find({ status: 'confirmed' })
+      .populate('postedBy', 'username email images')
+      .sort({ createdAt: -1 })
+      .skip((page - 1) * limit)
+      .limit(limit)
+      .exec()
+
+    const count = await Post.find({ status: 'confirmed' })
+      .countDocuments()
+      .exec()
+
+    if (!posts) {
+      return res.status(404).json({
+        success: false,
+        message: 'Could not find any posts',
+      })
+    }
+
+    return res.status(200).json({
+      success: true,
+      posts: posts,
+      count: count,
+      pages: Math.ceil(count / limit),
+    })
+  } catch (error) {
+    console.log(error.message)
+    return res.status(500).json({
+      success: false,
+      message: 'An error occurred',
+    })
+  }
+}
+
+//get unConfirmed posts
+exports.unconfirmedPosts = async (req, res) => {
+  try {
+    const limit = req.query.limit ? parseInt(req.query.limit) : 5
+    const page = req.query.page ? parseInt(req.query.page) : 1
+
+    const posts = await Post.find({ status: 'not confirmed' })
+      .populate('postedBy', 'username email images')
+      .sort({ createdAt: -1 })
+      .skip((page - 1) * limit)
+      .limit(limit)
+      .exec()
+
+    const count = await Post.find({ status: 'not confirmed' })
+      .countDocuments()
+      .exec()
+
+    if (!posts) {
+      return res.status(404).json({
+        success: false,
+        message: 'Could not find any posts',
+      })
+    }
+
+    return res.status(200).json({
+      success: true,
+      posts: posts,
+      count: count,
+      pages: Math.ceil(count / limit),
+    })
+  } catch (error) {
+    console.log(error.message)
+    return res.status(500).json({
+      success: false,
+      message: 'An error occurred',
+    })
+  }
+}
+
+exports.changeStatus = async (req, res) => {
+  const postId = req.params.postId
+  const { status } = req.body
+
+  try {
+    let post = await Post.findByIdAndUpdate(postId, { status }, { new: true })
+    if (!post) {
+      return res.status(404).json({
+        success: false,
+        message: 'The post not found',
+      })
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: 'Post updated succefully',
     })
   } catch (error) {
     console.log(error.message)
